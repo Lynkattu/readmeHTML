@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Build planner</title>
+        <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+/* From extension ms-toolsai.jupyter */
+/* These classnames are inherited from bootstrap, but are present in most notebook renderers */
+
+.alert {
+    width: auto;
+    padding: 1em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+.alert > *:last-child {
+    margin-bottom: 0;
+}
+#preview > .alert:last-child {
+    /* Prevent this being set to zero by the default notebook stylesheet */
+    padding-bottom: 1em;
+}
+
+.alert-success {
+    /* Note there is no suitable color available, so we just copy "info" */
+    background-color: var(--theme-info-background);
+    color: var(--theme-info-foreground);
+}
+.alert-info {
+    background-color: var(--theme-info-background);
+    color: var(--theme-info-foreground);
+}
+.alert-warning {
+    background-color: var(--theme-warning-background);
+    color: var(--theme-warning-foreground);
+}
+.alert-danger {
+    background-color: var(--theme-error-background);
+    color: var(--theme-error-foreground);
+}
+
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="build-planner">Build planner</h1>
+<p>This document is presentation of <strong>build planner</strong> project <em>attribute page</em>. This type of pages are typical in RPG games, in attribute page you can calculate your character attributes.</p>
+<ul>
+<li>top bar is for navigation and music player</li>
+<li>left bar contains character race, gender, level and attributes</li>
+<li>right bar contains character stat information</li>
+</ul>
+<p><img src="..\Main%20View.png" alt="first view"></p>
+<p>Every race have their unique color theme, music and background images.</p>
+<p><img src="..\Race%20View.png" alt="race view"></p>
+<p>There is below some base information about stats, attributes and levels</p>
+<ul>
+<li>each race have different starting attribute values</li>
+<li>levels increase some base stats and give remaining attribute points</li>
+<li>all attributes increases 3 different stats</li>
+</ul>
+<p><img src="..\AttributeDemo.png" alt="attribute demo"></p>
+<hr>
+<h2 id="technical">Technical</h2>
+<p>I have used HTML, SCSS/CSS and Java Script to create build planner website. Js code below load on page load/reload it set theme to default theme if there is not any theme yet otherwise it load current theme. Important information is saved on local storage.</p>
+<pre><code class="language-js"><span class="hljs-keyword">if</span>(<span class="hljs-variable language_">window</span>.<span class="hljs-property">localStorage</span>.<span class="hljs-title function_">getItem</span>(<span class="hljs-string">&quot;theme&quot;</span>) == <span class="hljs-literal">null</span>){
+    <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-property">classList</span>.<span class="hljs-title function_">add</span>(<span class="hljs-string">&quot;astelian-theme&quot;</span>)
+    <span class="hljs-variable language_">window</span>.<span class="hljs-property">localStorage</span>.<span class="hljs-title function_">setItem</span>(<span class="hljs-string">&quot;theme&quot;</span>, <span class="hljs-string">&quot;astelian&quot;</span>)
+    <span class="hljs-variable language_">document</span>.<span class="hljs-property">documentElement</span>.<span class="hljs-property">style</span>.<span class="hljs-title function_">setProperty</span>(<span class="hljs-string">&#x27;---background-image&#x27;</span>, imageDict[<span class="hljs-string">&quot;astelianFemale&quot;</span>])
+    <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;music-player&quot;</span>).<span class="hljs-property">src</span> = musicDict[<span class="hljs-string">&quot;astelian&quot;</span>]
+    <span class="hljs-title function_">onPlayAudio</span>()
+}
+<span class="hljs-keyword">else</span>{
+    <span class="hljs-title function_">setTheme</span>(<span class="hljs-variable language_">window</span>.<span class="hljs-property">localStorage</span>.<span class="hljs-title function_">getItem</span>(<span class="hljs-string">&quot;theme&quot;</span>))
+}
+
+</code></pre>
+<p>Function below is called when any attribute increasing button is clicked.</p>
+<pre><code class="language-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">increaseAttribute</span>(<span class="hljs-params">e,attributeID</span>) {
+    <span class="hljs-keyword">let</span> attributeChange
+    <span class="hljs-keyword">if</span> (e.<span class="hljs-property">shiftKey</span>){
+        <span class="hljs-keyword">if</span>(remainingAttribute &gt;= <span class="hljs-number">10</span> &amp;&amp; attributesDict[attributeID] + <span class="hljs-number">10</span> &lt;= attributeMaxValue){
+            attributeChange = <span class="hljs-number">10</span>
+        }
+        <span class="hljs-keyword">else</span>{
+            attributeChange = remainingAttribute
+        }
+    }
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (e.<span class="hljs-property">ctrlKey</span>){
+        <span class="hljs-keyword">if</span>(attributesDict[attributeID] + remainingAttribute &gt; attributeMaxValue){
+            attributeChange = remainingAttribute-(remainingAttribute-(attributeMaxValue - attributesDict[attributeID]))
+        }<span class="hljs-keyword">else</span> 
+            attributeChange = remainingAttribute
+        
+    }
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (attributesDict[attributeID] &lt; attributeMaxValue &amp;&amp; remainingAttribute &gt; <span class="hljs-number">0</span>){
+        attributeChange = <span class="hljs-number">1</span>
+    }
+    <span class="hljs-keyword">if</span> (remainingAttribute &gt; <span class="hljs-number">0</span> &amp;&amp; attributesDict[attributeID] &lt; attributeMaxValue){
+        <span class="hljs-title function_">attributeBonusUpdate</span>(attributeID, attributeChange)
+        <span class="hljs-title function_">changeAttributeValue</span>(attributeID, attributeChange)
+        <span class="hljs-title function_">changeRemainingAttribute</span>(-attributeChange)
+        <span class="hljs-title function_">updateAllAttributes</span>()
+    }
+}
+</code></pre>
+<p>This is one color theme from _base.scss file.</p>
+<pre><code class="language-scss"><span class="hljs-selector-class">.eldritch-theme</span> {
+    -<span class="hljs-attr">--dark</span>: <span class="hljs-number">#000011</span>;
+    -<span class="hljs-attr">--shade</span>: <span class="hljs-number">#202030</span>;
+    -<span class="hljs-attr">--shade-light</span>: <span class="hljs-number">#303040</span>;
+    -<span class="hljs-attr">--medium</span>: <span class="hljs-number">#505070</span>;
+    -<span class="hljs-attr">--medium-light</span>: <span class="hljs-number">#707070</span>;
+    -<span class="hljs-attr">--text</span>: <span class="hljs-number">#c0c0c0</span>;
+    -<span class="hljs-attr">--text-light</span>: <span class="hljs-number">#e0e0e0</span>;
+    -<span class="hljs-attr">--text-primary</span>: <span class="hljs-number">#e0e0e0</span>;
+}
+
+</code></pre>
+
+        
+        
+    </body>
+    </html>
